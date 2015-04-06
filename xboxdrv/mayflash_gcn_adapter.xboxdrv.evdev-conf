@@ -1,0 +1,232 @@
+# Default Example
+# ===============
+#
+# This is simply the default xboxdrv configuration, replicated as INI
+# file with a few comments
+
+[xboxdrv]
+# Debugging output and verbosity
+silent    = true
+# verbose   = true
+usb-debug = false
+
+# timeout = 25
+
+# config = otherconfig.xboxdrv
+# alt-config = otherconfig.xboxdrv
+
+controller-id = 0
+# detach-kernel-driver = true
+device-name = "Mayflash Gamecube Controller USB Adapter - Port 1"
+evdev = /dev/input/by-id/usb-HuiJia_USB_GamePad-event-joystick
+# evdev-debug = true
+evdev-grab = true
+# extra-devices = true
+# extra-events = true
+# force-feedback = true
+ff-device = 21
+
+# instant-exit = false
+# led = -1
+# next = true
+# next-controller = true
+# no-uinput = true
+# quiet = false
+rumble = true
+rumble-gain = 254
+rumble-l = 254
+rumble-r = 254
+
+# These are the deadzones I've used, though
+# it remains to be seen whether or not these
+# are optimal.
+deadzone = 10%
+deadzone-trigger = 5%
+
+# Lets us have that sweet automatic controller config
+# in the games that support it.  Possibly not as useful
+# given the workarounds in place due to the smaller
+# set of buttons on a GCN controller, but it's still nice
+# to not have to mess with things as much.
+mimic-xpad = true
+
+# The GCN controller's Dpad is pretty touchy with its
+# diagonals, so I've gotten the best results when
+# using the Dpad as buttons.
+dpad-as-button = true
+
+# These are the vendor/product IDs that the
+# Mayflash GCN USB adapter uses.  Via lsusb,
+# it identifies as 'ACRUX' and has two ports.
+#
+# I'm still working out how to configure both
+# ports simultaneously.
+vendor-id = 1a34
+product-id = f705
+
+[xboxdrv-daemon]
+detach = true
+# on-connect = /home/juser/bin/on-connect.sh
+# on-disconnect = /home/juser/bin/on-connect.sh
+# pid-file = /var/run/xboxdrv.pid
+
+[autofire]
+
+[axis-sensitivity]
+
+# The triggers are a bit too sensitive by default.
+# Setting both sensitivities to -.75 allows for a
+# slight delay between pressing down on a trigger
+# and reaching its maximum point, which is just before
+# the digital trigger button clicks.
+LT = -.75
+RT = -.75
+
+[axismap]
+
+# The analog stick's Y-axis is inverted by default.
+-Y1=Y1
+
+[buttonmap]
+
+[calibration]
+
+# These are my personal calibration parameters,
+# though they seem to work for the GCN controllers
+# with which I've tested this configuration.  You
+# may want to determine your own and insert them here.
+
+X1=-24500:0:24500
+Y1=-24500:0:24500
+
+X2=-23000:0:23000
+Y2=-23000:0:23000
+
+# Instead of directly calibrating the triggers, I've
+# gotten better results using these values to
+# configure the triggers as relative axes.  See the
+# section on relative axes below for details.
+#LT=-27500:0:19500
+#RT=-27500:0:19500
+
+[evdev-absmap]
+
+ABS_X = X1              # analog stick
+ABS_Y = Y1              #
+
+ABS_RZ = X2             # C-stick
+ABS_Z = Y2              #
+
+ABS_RX = LT             # left trigger
+ABS_RY = RT             # right trigger
+
+# ABS_HAT0X = DPAD_X    # I use the Dpad as buttons here
+# ABS_HAT0Y = DPAD_Y    # because the GCN Dpad seems a bit
+                        # touchy when it comes to diagonals.
+
+[evdev-keymap]
+
+BTN_THUMB   = A         # A button
+BTN_THUMB2  = B         # B button
+BTN_TRIGGER = X         # X button
+BTN_TOP     = Y         # Y button
+
+BTN_TOP2   = TL         # left trigger button
+BTN_PINKIE = TR         # right trigger button
+
+# Here, the map from Z to RB is used as a
+# stand-in for a small config toggle.  In
+# the UI button map below, it's used to access
+# some of the XB360 buttons that can't be directly
+# mapped to the GCN controller's smaller set of buttons.
+BTN_BASE2 = RB          # Z button
+
+KEY_#300 = DU           # Dpad up
+KEY_#301 = DR           # Dpad right
+KEY_#302 = DD           # Dpad down
+BTN_DEAD = DL           # Dpad left
+
+BTN_BASE4 = Start       # start button
+
+BTN_TL2   = LB          # Z+Dpad left
+BTN_TR2   = RB          # Z+Dpad right
+BTN_SELECT = Back       # Z+Dpad Down
+BTN_MODE = Guide        # Z+start
+
+[relative-axis]
+
+# The trigger axes each start at -32767,
+# so it's beneficial to measure them each
+# relative to the difference between their maximum
+# and minimum calibration limits instead of using
+# the calibration section directly.
+#
+# Mine, included via comments above, are [-27500,19500]
+# for each trigger.  I then use the difference, 47000,
+# as the basis for them as relative axes.
+LT=47000
+RT=47000
+
+[xboxdrv]
+#ui-clear = true
+
+[ui-axismap]
+# The primary analog stick.
+X1 = ABS_X
+Y1 = ABS_Y
+
+# The C-stick.
+X2 = ABS_RZ
+Y2 = ABS_Z
+
+# The triggers.
+LT = ABS_RX
+RT = ABS_RY
+
+[ui-buttonmap]
+
+# Face buttons.
+A = BTN_THUMB       # JS_1
+B = BTN_THUMB2      # JS_2
+X = BTN_TRIGGER     # JS_0
+Y = BTN_TOP         # JS_3
+
+# Trigger buttons.
+TL = BTN_TOP2       # JS_4
+TR = BTN_PINKIE     # JS_5
+
+# The Z button is used in conjunction with
+# other buttons to access XB360 buttons which
+# can't be directly mapped to the GCN controller
+# because of its smaller set of buttons.
+#
+# The options here mean that the Z button won't
+# look like a keypress to games, but when it's held
+# and pressed with the buttons listed below, it'll
+# look like you're pressing one of the XB360's extra
+# buttons.
+RB^click-both^toggle^const:0 = BTN_BASE2        # JS_6
+
+Start=BTN_BASE4     # JS_7
+
+DU = KEY_#300       # JS_8
+DR = KEY_#301       # JS_9
+DD = KEY_#302       # JS_10
+DL = BTN_DEAD       # JS_11
+
+# Buttons accessed via the Z button:
+
+# Z + Dpad left --> LB
+RB+DL=BTN_TL2       # JS_13
+
+# Z + Dpad right --> RB
+RB+DR=BTN_TR2       # JS_14
+
+# Z + Dpad down --> back
+RB+DD=BTN_SELECT     # JS_15
+
+# Z + start --> guide
+RB+Start=BTN_MODE   # JS_16
+
+
+# EOF #
